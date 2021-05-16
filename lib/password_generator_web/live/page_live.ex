@@ -1,39 +1,83 @@
 defmodule PasswordGeneratorWeb.PageLive do
   use PasswordGeneratorWeb, :live_view
+  alias PasswordGenerator.Password
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, query: "", results: %{})}
+    {:ok, password} = Password.generate(8, false, false)
+
+    {:ok,
+     socket
+     |> assign(password: password)
+     |> assign(include_number: false)
+     |> assign(include_special_symbol: false)
+     |> assign(length: "8")}
   end
 
   @impl true
-  def handle_event("suggest", %{"q" => query}, socket) do
-    {:noreply, assign(socket, results: search(query), query: query)}
+  def handle_event(
+        "change-password-input",
+        %{
+          "password" => %{
+            "length" => length,
+            "number?" => number?,
+            "special_symbol?" => special_symbol?
+          }
+        },
+        socket
+      ) do
+    length =
+      case length |> Integer.parse() do
+        {int, _} when int < 2 ->
+          2
+
+        {int, _} ->
+          int
+
+        _ ->
+          2
+      end
+
+    number? = number? |> determine_boolean()
+    special_symbol? = special_symbol? |> determine_boolean()
+
+    {:ok, password} = Password.generate(length, number?, special_symbol?)
+
+    {:noreply,
+     socket
+     |> assign(password: password)
+     |> assign(length: length |> Integer.to_string())
+     |> assign(include_number: number?)
+     |> assign(include_special_symbol: special_symbol?)}
   end
 
-  @impl true
-  def handle_event("search", %{"q" => query}, socket) do
-    case search(query) do
-      %{^query => vsn} ->
-        {:noreply, redirect(socket, external: "https://hexdocs.pm/#{query}/#{vsn}")}
+  def handle_event("generate-new-password", %{}, socket) do
+    number? = socket.assigns.include_number
+    special_symbol? = socket.assigns.include_special_symbol
+    length = socket.assigns.length
 
-      _ ->
-        {:noreply,
-         socket
-         |> put_flash(:error, "No dependencies found matching \"#{query}\"")
-         |> assign(results: %{}, query: query)}
-    end
+    length =
+      case socket.assigns.length |> Integer.parse() do
+        {int, _} when int < 2 ->
+          2
+
+        {int, _} ->
+          int
+
+        _ ->
+          2
+      end
+
+    {:ok, password} = Password.generate(length, number?, special_symbol?)
+
+    {:noreply,
+     socket
+     |> assign(password: password)
+     |> assign(length: length |> Integer.to_string())
+     |> assign(include_number: number?)
+     |> assign(include_special_symbol: special_symbol?)}
   end
 
-  defp search(query) do
-    if not PasswordGeneratorWeb.Endpoint.config(:code_reloader) do
-      raise "action disabled when not in development"
-    end
-
-    for {app, desc, vsn} <- Application.started_applications(),
-        app = to_string(app),
-        String.starts_with?(app, query) and not List.starts_with?(desc, ~c"ERTS"),
-        into: %{},
-        do: {app, vsn}
-  end
+  defp determine_boolean("true"), do: true
+  defp determine_boolean(_), do: false
 end

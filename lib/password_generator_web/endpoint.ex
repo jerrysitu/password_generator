@@ -24,7 +24,8 @@ defmodule PasswordGeneratorWeb.Endpoint do
     at: "/",
     from: :password_generator,
     gzip: false,
-    only: ~w(css fonts images js favicon.ico robots.txt)
+    # New convention seems to move css and js out of their sub-folders and directly in assets
+    only: ~w(assets fonts images favicon.ico robots.txt)
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

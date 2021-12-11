@@ -6,14 +6,12 @@ defmodule PasswordGenerator.PasswordTest do
     test "generats a password containing at least one number when number? is true" do
       {:ok, password} = Password.generate(8, true, false)
 
+      @numbers 0..9 |> Enum.map(fn x -> x |> Integer.to_string() end)
+
       assert password
              |> String.codepoints()
-             |> Enum.any?(fn pw_char ->
-               Enum.any?(numbers(), fn number ->
-                 number == pw_char
-               end)
-             end) ==
-               true
+             # In?!?!?
+             |> Enum.any?(fn pw_char -> pw_char in @numbers end)
     end
 
     test "generats a password containing contains at least one special_character when special_char? is true" do

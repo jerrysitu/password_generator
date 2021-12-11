@@ -1,12 +1,36 @@
-/* This file is for your main application css. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@import "./phoenix.css";
+/* For Phoenix Live reload script */
+[hidden] {
+  display: none;
+}
 
-@import "tailwindcss/base";
+/* FORMS */
+.form-control {
+  @apply w-full px-3 py-1 text-base leading-8 text-gray-700 transition-colors duration-200 ease-in-out bg-white border border-gray-300 rounded outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200;
+}
 
-@import "tailwindcss/components";
+/* BUTTONS */
+.btn {
+  @apply border border-transparent rounded focus:outline-none;
+}
+.btn.btn-primary {
+  @apply px-6 py-2 text-lg text-white bg-blue-500 hover:bg-blue-600;
+}
 
-@import "tailwindcss/utilities";
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  input[type="range"]::-webkit-slider-thumb {
+    width: 15px;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 15px;
+    background: #fff;
+    box-shadow: -405px 0 0 400px #4f46e5;
+    border-radius: 50%;
+  }
+}
 
 /* LiveView specific classes for your customizations */
 .phx-no-feedback.invalid-feedback,
